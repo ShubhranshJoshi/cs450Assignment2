@@ -5,7 +5,6 @@ import * as d3 from "d3";
 class App extends Component {
   constructor(props) {
     super(props);
-    // simple state as requested
     this.state = { wordFrequency: [] };
   }
 
@@ -41,21 +40,17 @@ class App extends Component {
   };
 
   renderChart() {
-    const data = this.state.wordFrequency; // top 5, sorted desc by count
+    const data = this.state.wordFrequency;
     const svg = d3.select(".svg_parent");
-
-    // fixed layout size
     const width = 1000;
     const height = 380;
     svg.attr("width", width).attr("height", height);
 
-    // If no data, clear and exit
     if (!data || data.length === 0) {
       svg.selectAll("*").remove();
       return;
     }
 
-    // compute font scale (guard against equal min/max)
     const counts = data.map(d => d.count);
     const minC = d3.min(counts);
     const maxC = d3.max(counts);
@@ -63,53 +58,40 @@ class App extends Component {
       .domain(minC === maxC ? [minC - 1, maxC + 1] : [minC, maxC])
       .range([24, 72]);
 
-    // linear x scale across indices 0..n-1 (assignment requirement)
     const n = data.length;
     const leftPad = 150;
     const rightPad = 150;
     const xScale = d3.scaleLinear().domain([0, Math.max(1, n - 1)]).range([leftPad, width - rightPad]);
 
     const centerY = height / 2;
-
-    // KEYED JOIN so D3 tracks each word element across updates by word
     const sel = svg.selectAll("text.word").data(data, d => d.word);
-
-    // EXIT: fade out and remove
     sel.exit()
       .transition()
       .duration(600)
       .style("opacity", 0)
       .style("font-size", "1px")
       .remove();
-
-    // ENTER: place at its new x, tiny then grow to proper size
     const enter = sel.enter()
       .append("text")
       .attr("class", "word")
       .attr("text-anchor", "middle")
-      // initial position at final index's x (so it grows at its eventual place)
       .attr("x", (_, i) => xScale(i))
       .attr("y", centerY)
       .style("opacity", 0)
       .style("font-size", "1px")
       .text(d => d.word);
-
     enter.transition()
       .duration(900)
       .ease(d3.easeCubicOut)
       .style("opacity", 1)
       .style("font-size", d => `${fontScale(d.count)}px`);
-
-    // UPDATE: smoothly move to new x and new font size when frequencies/ranks change
     sel.transition()
       .duration(900)
       .ease(d3.easeCubicInOut)
-      .attr("x", (_, i) => xScale(i))           // index i corresponds to new rank in current data array
+      .attr("x", (_, i) => xScale(i))          
       .attr("y", centerY)
       .style("font-size", d => `${fontScale(d.count)}px`)
       .style("opacity", 1);
-
-    // (note) we left DOM order as-is; setting x by index ensures they move to positions reflecting new ranking
   }
 
   render() {
@@ -128,7 +110,6 @@ class App extends Component {
             style={{ marginTop: 10, height: 40, width: 1000 }}
             onClick={() => {
               const v = document.getElementById("input_field").value;
-              // compute top-5 and set state; next renderChart call will animate changes
               this.setState({ wordFrequency: this.getWordFrequency(v) });
             }}
           >
