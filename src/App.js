@@ -102,7 +102,7 @@ class App extends Component {
             type="text"
             id="input_field"
             style={{ height: 150, width: 1000 }}
-            defaultValue={`The streets were filled with people, people walking, people talking, people laughing, people in a hurry. Everyone seemed to be in a rush, moving quickly from one place to another. The city was alive with activity, with people everywhere you looked. The noise of the city was constant, with cars honking, people chatting, and footsteps echoing through the streets. It was a city full of people, a city where life never stopped.`}
+            
           />
           <button
             type="submit"
